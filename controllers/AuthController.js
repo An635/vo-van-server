@@ -1,6 +1,7 @@
 import User from "../models/UserModel.js";
 import jwt from "jsonwebtoken";
 import { compare } from "bcrypt";
+import {renameSync, unlinkSync} from 'fs';
 
 const maxAge = 3*24*60*60*1000;
 
@@ -107,7 +108,7 @@ export const updateProfile = async(req, res, next) =>{
     try{
         const {userId} = req;
         const {firstName, lastName, color} = req.body;
-        console.log({firstName, lastName, color})
+        // console.log({firstName, lastName, color})
         if(!firstName || !lastName){
             return res.status(404).send('First,last and color is required!');
         }
@@ -124,8 +125,6 @@ export const updateProfile = async(req, res, next) =>{
         if(!userData){
             return res.status(404).send('User with the given id not found.');
         }
-
-
         // console.log(req.userId)
         return res.status(200).json({
             id:userData.id,
@@ -136,6 +135,58 @@ export const updateProfile = async(req, res, next) =>{
             image: userData.image,
             color: userData.color
         })
+
+    }catch(error){
+        console.log(error);
+        return res.status(500).send('Internal server error');
+    }
+}
+
+export const addProfileImage = async(req, res, next) =>{
+    try{
+        if(!req.file){
+            return res.status(400).send('File is required.')
+        }
+
+        const date = Date.now();
+        let fileName = 'uploads/profiles/' + date + req.file.originalname;
+        renameSync(req.file.path, fileName);
+
+        const updateUser = await User.findByIdAndUpdate(
+            req.userId, 
+            {image: fileName},
+            {new:true, runValidators:true}
+        );
+
+        // console.log(req.userId)
+        return res.status(200).json({
+            image: updateUser.image,
+        })
+
+    }catch(error){
+        console.log(error);
+        return res.status(500).send('Internal server error');
+    }
+}
+
+export const removeProfileImage = async(req, res, next) =>{
+    try{
+        const {userId} = req;
+        const user = await User.findById(userId);
+        if(!user){
+            return res.status(400).send('User not found');
+        }
+
+        if(user.image){
+            unlinkSync(user.image)
+        }
+
+        user.image = null;
+        await user.save();
+
+
+        // console.log(req.userId)
+        return res.status(200).send('Profle image removed successfully.');
 
     }catch(error){
         console.log(error);
