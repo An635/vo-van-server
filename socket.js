@@ -5,7 +5,7 @@ import Message from './models/MessageModel.js';
 const setupSocket = (server) =>{
     const io = new SocketIoServer(server, {
         cors:{
-            origin: process.env.ORIGIN,
+            origin:[process.env.ORIGIN,process.env.ORIGINS],
             methods:["GET", "POST"],
             credentials:true,
         }

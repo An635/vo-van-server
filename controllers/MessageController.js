@@ -19,12 +19,12 @@ export const getMessages = async(req, res, next) =>{
         }).sort({ timestamp: 1 });
 
         return res.status(200).json({messages});
-        
+
     } catch (error) {
         console.log({error});
         return res.status(500).send('Internal server error.')
     }
-}
+};
 
 export const uploadFile = async(req, res, next) =>{
     try {
@@ -43,9 +43,9 @@ export const uploadFile = async(req, res, next) =>{
 
 
         return res.status(200).json({filePath:fileName});
-        
+
     } catch (error) {
         console.log({error});
         return res.status(500).send('Internal server error.')
     }
-}
+};
